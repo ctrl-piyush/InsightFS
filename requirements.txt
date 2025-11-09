@@ -1,0 +1,10 @@
+# FUSE Filesystem
+fusepy
+
+# AI & Data
+python-magic    # For file type classification
+scikit-learn    # For TF-IDF search
+nltk            # For NLP stopwords (used by scikit-learn)
+
+# Dashboard
+Flask
