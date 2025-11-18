@@ -24,7 +24,7 @@
 
 InsightFS mimics a standard Operating System architecture by splitting responsibilities into **Kernel Space** (simulated via FUSE) and **User Space** (the Dashboard).
 
-```mermaid
+
 graph TD
     User[User / Dashboard] -->|Writes File| MountPoint[Mount Point (my_fs)]
     MountPoint -->|Intercepts System Call| FUSE[FUSE Driver (insightfs.py)]
@@ -37,8 +37,8 @@ graph TD
     
     subgraph "User Space (Terminal 2)"
     Dashboard[Flask Web App] -->|Reads| DB
-    Dashboard -->|Sends Commands| MountPoint
-    end
+    Dashboard -->|Sends Commands| MountPoint 
+    
 The Kernel (Terminal 1): Runs insightfs.py. This daemon holds the mount point active, intercepting write, read, and unlink syscalls.
 
 The Interface (Terminal 2): Runs dashboard/app.py. A Flask application that queries the metadata database and allows user interaction.
@@ -65,11 +65,9 @@ source venv/bin/activate
 
 # Install dependencies
 pip install -r requirements.txt
+
 2. Create Directory Structure
 We need three key folders for the filesystem to work:
-
-Bash
-
 mkdir -p my_fs storage_backend metadata
 my_fs: The virtual mount point (User entry).
 
@@ -82,9 +80,6 @@ Because this is a filesystem driver, it must run in a separate process from the 
 
 Step 1: Start the Filesystem (Terminal 1)
 This acts as the OS Kernel driver.
-
-Bash
-
 # Ensure venv is activated
 source venv/bin/activate
 
@@ -94,9 +89,6 @@ python insightfs.py storage_backend my_fs metadata/file_index.db
 
 Step 2: Start the Dashboard (Terminal 2)
 Open a new terminal window/tab.
-
-Bash
-
 # Navigate to project and activate venv
 cd path/to/insightfs
 source venv/bin/activate
@@ -118,9 +110,6 @@ Verify: Check the my_fs/ folder in your file explorer to see the files created.
 Error: "Transport endpoint is not connected" This happens if the FUSE script (Terminal 1) crashed or was closed improperly.
 
 Fix: Unmount the directory manually:
-
-Bash
-
 fusermount -u my_fs
 Then restart Step 1.
 
@@ -129,8 +118,6 @@ Error: "Database not found"
 Fix: Ensure Terminal 1 (insightfs.py) is running before you start Terminal 2. The filesystem creates the database.
 
 📂 Project Structure
-Plaintext
-
 InsightFS/
 ├── ai_engine/              # Core AI Logic
 │   ├── analysis_manager.py # Orchestrates classification & DB updates
@@ -143,5 +130,3 @@ InsightFS/
 ├── insightfs.py            # Main FUSE Driver (The "Kernel")
 ├── requirements.txt        # Python dependencies
 └── README.md               # Documentation
-📜 License
-This project is open-source and available under the MIT License.
