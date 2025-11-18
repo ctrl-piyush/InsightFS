@@ -1,0 +1,12 @@
+{
+    "python.pythonPath": "${workspaceFolder}/venv/bin/python",
+    "python.linting.pylintEnabled": true,
+    "python.linting.enabled": true,
+    "files.watcherExclude": {
+        "**/storage_backend/**": true,
+        "**/my_fs/**": true,
+        "**/venv/**": true,
+        "**/.pytest_cache/**": true,
+        "**/__pycache__/**": true
+    }
+}

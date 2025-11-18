@@ -1,23 +1,12 @@
-# Python
+# Ignore Python Environment
+venv/
 __pycache__/
 *.pyc
-*.pyo
-*.pyd
-.Python
-env/
-venv/
-*.egg-info/
-.pytest_cache/
 
-# VSCode
-.vscode/
-
-# InsightFS
-*.db
-*.db-journal
-storage_backend/
+# Ignore OS Project Specifics
 my_fs/
-*.zip
-venv/
-__pycache__/
-*.db-journal
+storage_backend/
+metadata/file_index.db
+
+# Ignore System Files
+.DS_Store

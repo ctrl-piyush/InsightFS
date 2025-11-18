@@ -1,245 +1,254 @@
 <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>InsightFS Dashboard</title>
+    <link href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 10px; }
+        ::-webkit-scrollbar-track { background: #1f2937; }
+        tr { transition: background-color 0.2s; }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-300 p-8" onload="feather.replace()">
 
-<html lang="en"> <head> <meta charset="UTF-R"> <meta name="viewport" content="width=device-width, initial-scale=1.0"> <title>InsightFS Dashboard</title> <!-- Tailwind CSS --> <script src="https://cdn.tailwindcss.com"></script> <!-- Chart.js --> <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script> <!-- Feather Icons --> <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script> <style> body { font-family: 'Inter', sans-serif; } /* Custom scrollbar for a cleaner look */ ::-webkit-scrollbar { width: 6px; height: 6px; } ::-webkit-scrollbar-thumb { background: #475569; border-radius: 10px; } ::-webkit-scrollbar-track { background: #1e293b; } </style> </head> <body class="bg-slate-900 text-slate-300 p-8" onload="feather.replace()">
-
-<div class="container mx-auto max-w-7xl">
-    
-    <!-- Header -->
-    <header class="mb-8">
-        <h1 class="text-4xl font-bold text-white flex items-center">
-            <i data-feather="activity" class="inline-block h-8 w-8 text-cyan-400 mr-3"></i>
-            InsightFS Dashboard
-        </h1>
-        <p class="text-xl text-slate-400">Context-Aware AI File Manager</p>
-    </header>
-
-    <!-- KPI Cards Grid -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-        <!-- Total Files Card -->
-        <div class="bg-slate-800 p-6 rounded-lg shadow-lg flex items-center space-x-4">
-            <div class="bg-cyan-600/20 p-3 rounded-full">
-                <i data-feather="file" class="w-6 h-6 text-cyan-400"></i>
-            </div>
+    <div class="container mx-auto max-w-7xl">
+        <header class="mb-8 flex flex-col md:flex-row justify-between items-start md:items-center z-50 relative">
             <div>
-                <p class="text-sm text-slate-400">Total Files</p>
-                <p class="text-3xl font-bold text-white" id="total-files">0</p>
+                <h1 class="text-4xl font-bold text-white flex items-center">
+                    <i data-feather="activity" class="inline-block h-8 w-8 text-blue-400 mr-3"></i>
+                    InsightFS
+                </h1>
+                <p class="text-gray-400 mt-1">Context-Aware AI File Manager</p>
+            </div>
+            <div class="flex space-x-3 mt-4 md:mt-0 w-full md:w-auto">
+                <button onclick="promptCreateFile()" class="bg-green-600 hover:bg-green-500 text-white font-semibold py-3 px-4 rounded-lg flex items-center transition shadow-lg">
+                    <i data-feather="plus-square" class="w-5 h-5 mr-2"></i> New File
+                </button>
+                <div class="relative w-full md:w-80">
+                    <input type="text" id="searchInput" placeholder="AI Search..." class="w-full bg-gray-800 border border-gray-700 text-white rounded-lg pl-10 pr-4 py-3 focus:outline-none focus:border-blue-500">
+                    <div class="absolute left-3 top-3.5 text-gray-500"><i data-feather="search" class="h-5 w-5"></i></div>
+                    <div id="searchDropdown" class="absolute top-full left-0 w-full bg-gray-800 border border-gray-700 rounded-lg shadow-2xl mt-2 hidden max-h-96 overflow-y-auto z-50"></div>
+                </div>
+            </div>
+        </header>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6 z-0 relative">
+            <div class="bg-gray-800 p-6 rounded-lg shadow-lg flex items-center space-x-4">
+                <div class="bg-blue-600 bg-opacity-20 p-3 rounded-full"><i data-feather="file" class="w-6 h-6 text-blue-400"></i></div>
+                <div><p class="text-sm text-gray-400">Total Files</p><p class="text-3xl font-bold text-white" id="total-files">0</p></div>
+            </div>
+            <div class="bg-gray-800 p-6 rounded-lg shadow-lg flex items-center space-x-4">
+                <div class="bg-blue-600 bg-opacity-20 p-3 rounded-full"><i data-feather="database" class="w-6 h-6 text-blue-400"></i></div>
+                <div><p class="text-sm text-gray-400">Total Storage</p><p class="text-3xl font-bold text-white" id="total-storage">0 B</p></div>
+            </div>
+            <div class="bg-gray-800 p-6 rounded-lg shadow-lg flex items-center space-x-4">
+                <div class="bg-red-600 bg-opacity-20 p-3 rounded-full"><i data-feather="copy" class="w-6 h-6 text-red-400"></i></div>
+                <div><p class="text-sm text-gray-400">Duplicate Sets</p><p class="text-3xl font-bold text-white" id="duplicate-sets">0</p></div>
+            </div>
+            <div class="bg-gray-800 p-6 rounded-lg shadow-lg flex items-center space-x-4">
+                <div class="bg-yellow-600 bg-opacity-20 p-3 rounded-full"><i data-feather="alert-triangle" class="w-6 h-6 text-yellow-400"></i></div>
+                <div><p class="text-sm text-gray-400">Sensitive Files</p><p class="text-3xl font-bold text-white" id="sensitive-count">0</p></div>
             </div>
         </div>
-        <!-- Total Storage Card -->
-        <div class="bg-slate-800 p-6 rounded-lg shadow-lg flex items-center space-x-4">
-            <div class="bg-cyan-600/20 p-3 rounded-full">
-                <i data-feather="database" class="w-6 h-6 text-cyan-400"></i>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8 z-0 relative">
+            <div class="lg:col-span-2 bg-gray-800 p-6 rounded-lg shadow-lg">
+                <h2 class="text-2xl font-semibold text-white mb-4">File Type Distribution (By Count)</h2>
+                <div class="relative h-80 w-full"><canvas id="fileTypeChart"></canvas></div>
             </div>
-            <div>
-                <p class="text-sm text-slate-400">Total Storage</p>
-                <p class="text-3xl font-bold text-white" id="total-storage">0 B</p>
-            </div>
-        </div>
-        <!-- Duplicates Card -->
-        <div class="bg-slate-800 p-6 rounded-lg shadow-lg flex items-center space-x-4">
-            <div class="bg-red-600/20 p-3 rounded-full">
-                <i data-feather="copy" class="w-6 h-6 text-red-400"></i>
-            </div>
-            <div>
-                <p class="text-sm text-slate-400">Duplicate Sets</p>
-                <p class="text-3xl font-bold text-white" id="duplicate-sets">0</p>
+            <div class="lg:col-span-1 bg-gray-800 p-6 rounded-lg shadow-lg">
+                <h2 class="text-2xl font-semibold mb-4 text-white">Hot Files</h2>
+                <ul id="hot-files-list" class="space-y-3 h-80 overflow-y-auto pr-2"></ul>
             </div>
         </div>
-        <!-- Sensitive Files Card -->
-        <div class="bg-slate-800 p-6 rounded-lg shadow-lg flex items-center space-x-4">
-            <div class="bg-yellow-600/20 p-3 rounded-full">
-                <i data-feather="alert-triangle" class="w-6 h-6 text-yellow-400"></i>
-            </div>
-            <div>
-                <p class="text-sm text-slate-400">Sensitive Files</p>
-                <p class="text-3xl font-bold text-white" id="sensitive-count">0</p>
+
+        <div class="bg-gray-800 rounded-lg shadow-lg overflow-hidden z-0 relative">
+            <div class="p-6 border-b border-gray-700"><h2 class="text-2xl font-semibold text-white">All Files</h2></div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-gray-700 text-gray-400 uppercase text-xs font-semibold tracking-wider">
+                            <th class="p-4">File Name</th><th class="p-4">Path</th><th class="p-4">Size</th><th class="p-4 text-right">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="file-table-body" class="divide-y divide-gray-700 text-sm text-gray-300"></tbody>
+                </table>
             </div>
         </div>
     </div>
-
-    <!-- Main Content Grid -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-
-        <!-- Left Column: Storage Chart -->
-        <div class="lg:col-span-2 bg-slate-800 p-6 rounded-lg shadow-lg">
-            <h2 class="text-2xl font-semibold mb-4 text-white">Storage Visualization</h2>
-            <div class="relative h-96 min-h-[400px]">
-                <canvas id="fileTypeChart"></canvas>
-            </div>
-        </div>
-
-        <!-- Right Column: Lists -->
-        <div class="lg:col-span-1 space-y-6">
-            <!-- Hot Files -->
-            <div class="bg-slate-800 p-6 rounded-lg shadow-lg">
-                <h2 class="text-2xl font-semibold mb-4 text-white">Hot Files (Most Accessed)</h2>
-                <ul id="hot-files-list" class="space-y-3 h-48 overflow-y-auto">
-                    <!-- JS will inject items here -->
-                </ul>
-            </div>
-
-            <!-- Sensitive Files -->
-            <div class="bg-slate-800 p-6 rounded-lg shadow-lg">
-                <h2 class="text-2xl font-semibold mb-4 text-white">Sensitive Files Found</h2>
-                <ul id="sensitive-files-list" class="space-y-3 h-48 overflow-y-auto">
-                    <!-- JS will inject items here -->
-                </ul>
-            </div>
-        </div>
-    </div>
-</div>
 
 <script>
     let fileTypeChart = null;
+    let allFiles = [];
+
+    async function promptCreateFile() {
+        const filename = prompt("Enter filename (e.g. notes.txt):");
+        if (!filename) return;
+        const content = prompt("Enter content:");
+        try {
+            const res = await fetch('/api/create', {
+                method: 'POST', headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ filename, content: content || "" })
+            });
+            if(res.ok) { alert("Created!"); fetchData(); }
+            else { const d = await res.json(); alert("Error: " + d.error); }
+        } catch(e) { alert("Failed."); }
+    }
+
+    async function openFile(filepath) {
+        try {
+            const res = await fetch('/api/open', {
+                method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({filepath})
+            });
+            if(!res.ok) alert("Failed to open.");
+        } catch(e) { alert("Error."); }
+    }
+
+    async function deleteFile(filepath) {
+        if(!confirm("Delete?")) return;
+        try {
+            const res = await fetch('/api/delete', {
+                method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({filepath})
+            });
+            if(res.ok) fetchData();
+            else alert("Failed.");
+        } catch(e) { alert("Error."); }
+    }
 
     async function fetchData() {
         try {
             const response = await fetch('/api/stats');
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.error || 'Network response was not ok');
-            }
+            if (!response.ok) return;
             const data = await response.json();
             
-            if (data.error) {
-                throw new Error(data.error);
-            }
+            document.getElementById('total-files').textContent = data.general_stats?.file_count || 0;
+            document.getElementById('total-storage').textContent = formatBytes(data.general_stats?.total_size || 0);
+            document.getElementById('duplicate-sets').textContent = data.duplicate_summary?.count || 0;
+            document.getElementById('sensitive-count').textContent = data.sensitive_files?.length || 0;
 
-            // Update KPI Cards
-            document.getElementById('total-files').textContent = data.general_stats.file_count;
-            document.getElementById('total-storage').textContent = formatBytes(data.general_stats.total_size);
-            document.getElementById('duplicate-sets').textContent = data.duplicate_summary.count;
-            document.getElementById('sensitive-count').textContent = data.sensitive_files.length;
-
-            // Update Visuals
-            updateDoughnutChart(data.type_stats);
-            updateHotFiles(data.hot_files);
-            updateSensitiveFiles(data.sensitive_files);
-
-            // Re-run feather icons to render new icons
+            if(data.type_stats) updateDoughnutChart(data.type_stats);
+            if(data.hot_files) updateHotFiles(data.hot_files);
+            
+            allFiles = data.all_files || []; 
+            renderTable(allFiles);
             feather.replace();
-
-        } catch (error) {
-            console.error('Error fetching data:', error);
-            document.body.innerHTML = `<div class="bg-red-900 text-white p-8 rounded-lg max-w-4xl mx-auto mt-10">
-                <h1 class="text-3xl font-bold mb-4">Error Connecting to Dashboard API</h1>
-                <p class="text-xl">Could not fetch statistics from InsightFS.</p>
-                <p class="mt-4 bg-red-800 p-4 rounded font-mono">${error.message}</p>
-                <p class="mt-4">Please ensure the main \`insightfs.py\` process is running and has indexed at least one file.</p>
-            </div>`;
-        }
+        } catch (error) { console.error(error); }
     }
 
-    function formatBytes(bytes, decimals = 2) {
-        if (!+bytes) return '0 B' // Handles 0 or null
-        const k = 1024;
-        const dm = decimals < 0 ? 0 : decimals;
-        const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
-        const i = Math.floor(Math.log(bytes) / Math.log(k));
-        return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+    const searchInput = document.getElementById('searchInput');
+    const dropdown = document.getElementById('searchDropdown');
+
+    searchInput.addEventListener('keyup', async (e) => {
+        const query = e.target.value;
+        if (query.length < 2) { dropdown.classList.add('hidden'); return; }
+        try {
+            const res = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
+            const results = await res.json();
+            dropdown.innerHTML = '';
+            if (results.length === 0) dropdown.innerHTML = '<div class="p-4 text-gray-500">No results</div>';
+            else {
+                results.forEach(file => { 
+                    const div = document.createElement('div');
+                    div.className = 'p-3 hover:bg-gray-700 border-b border-gray-700 cursor-pointer';
+                    div.innerHTML = `<div class="text-white text-sm">${file.name}</div><div class="text-xs text-gray-500">${file.score}</div>`;
+                    div.onclick = () => openFile(file.filepath);
+                    dropdown.appendChild(div);
+                });
+            }
+            dropdown.classList.remove('hidden');
+        } catch (e) {}
+    });
+    document.addEventListener('click', (e) => { if (!searchInput.contains(e.target)) dropdown.classList.add('hidden'); });
+
+    function renderTable(files) {
+        const tbody = document.getElementById('file-table-body');
+        tbody.innerHTML = '';
+        files.slice(0, 50).forEach(file => {
+            const tr = document.createElement('tr');
+            tr.className = 'hover:bg-gray-700';
+            const safePath = file.filepath.replace(/\\/g, '\\\\');
+            tr.innerHTML = `
+                <td class="p-4 text-white flex items-center"><i data-feather="file" class="mr-2 text-gray-500"></i>${file.name}</td>
+                <td class="p-4 text-gray-400 truncate max-w-xs" title="${file.filepath}">${file.filepath}</td>
+                <td class="p-4 text-xs text-gray-400">${formatBytes(file.size)}</td>
+                <td class="p-4 text-right space-x-2">
+                    <button onclick="openFile('${safePath}')" class="text-xs bg-blue-600 text-white px-3 py-1 rounded">Open</button>
+                    <button onclick="deleteFile('${safePath}')" class="text-xs bg-red-600 text-white px-3 py-1 rounded">Del</button>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
     }
 
-    function updateDoughnutChart(typeStats) {
-        const ctx = document.getElementById('fileTypeChart').getContext('2d');
-        const labels = typeStats.map(d => d.category);
-        const data = typeStats.map(d => d.total_size);
-
-        const chartData = {
-            labels: labels,
-            datasets: [{
-                label: 'Storage by Type',
-                data: data,
-                backgroundColor: [
-                    '#22d3ee', // cyan-400
-                    '#38bdf8', // lightBlue-400
-                    '#60a5fa', // blue-400
-                    '#a78bfa', // violet-400
-                    '#f472b6', // pink-400
-                    '#64748b'  // slate-500
-                ],
-                borderColor: '#1e293b', // slate-800
-                hoverOffset: 8,
-                borderWidth: 4
-            }]
-        };
-
-        if (fileTypeChart) {
-            fileTypeChart.data = chartData;
-            fileTypeChart.update();
-        } else {
-            fileTypeChart = new Chart(ctx, {
-                type: 'doughnut',
-                data: chartData,
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    cutout: '70%',
-                    plugins: {
-                        legend: {
-                            position: 'right',
-                            labels: {
-                                color: '#cbd5e1', // slate-300
-                                boxWidth: 20,
-                                padding: 20,
-                                font: { size: 14 }
-                            }
-                        },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    let label = context.label || '';
-                                    let value = context.parsed;
-                                    return ` ${label}: ${formatBytes(value)}`;
-                                }
-                            }
-                        }
-                    }
-                }
-            });
-        }
+    function formatBytes(bytes, decimals=2) {
+        if (!+bytes) return '0 B';
+        const k=1024, i=Math.floor(Math.log(bytes)/Math.log(k));
+        return parseFloat((bytes/Math.pow(k,i)).toFixed(decimals))+' '+['B','KB','MB','GB'][i];
     }
 
     function updateHotFiles(files) {
         const list = document.getElementById('hot-files-list');
         list.innerHTML = '';
-        if (files.length === 0) {
-            list.innerHTML = '<li class="text-slate-400">No file access has been logged yet.</li>';
-            return;
-        }
         files.forEach(file => {
             const li = document.createElement('li');
-            li.className = 'flex justify-between items-center bg-slate-700/50 hover:bg-slate-700 p-3 rounded-lg transition-colors';
-            li.innerHTML = `
-                <div class="flex items-center truncate min-w-0">
-                    <i data-feather="file-text" class="w-4 h-4 mr-3 text-cyan-400 flex-shrink-0"></i>
-                    <span class="text-sm truncate" title="${file.filepath}">${file.filepath.split('/').pop()}</span>
-                </div>
-                <span class="text-xs font-medium bg-cyan-600/20 text-cyan-300 px-2 py-0.5 rounded-full flex-shrink-0 ml-2">${file.access_count} reads</span>
-            `;
+            li.className = 'flex justify-between items-center bg-gray-700 p-3 rounded-lg';
+            const fname = file.filepath.split('/').pop().split('\\').pop();
+            li.innerHTML = `<div class="truncate text-gray-200">${fname}</div><span class="text-xs bg-blue-900 px-2 py-0.5 rounded-full">${file.access_count}</span>`;
             list.appendChild(li);
         });
     }
 
-    function updateSensitiveFiles(files) {
-        const list = document.getElementById('sensitive-files-list');
-        list.innerHTML = '';
-        if (files.length === 0) {
-            list.innerHTML = '<li class="text-slate-400">No sensitive files detected.</li>';
-            return;
+    function updateDoughnutChart(typeStats) {
+        const ctx = document.getElementById('fileTypeChart').getContext('2d');
+        
+        // FIX: Use 'count' instead of 'total_size' so empty files show up
+        const labels = typeStats.map(d => d.category);
+        const dataPoints = typeStats.map(d => d.count);
+
+        if (fileTypeChart) {
+            fileTypeChart.data.labels = labels;
+            fileTypeChart.data.datasets[0].data = dataPoints;
+            fileTypeChart.update();
+        } else {
+            fileTypeChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{ 
+                        label: 'File Count', 
+                        data: dataPoints, 
+                        backgroundColor: ['#60a5fa', '#3b82f6', '#2563eb', '#8b5cf6', '#ec4899', '#9ca3af', '#fbbf24'], 
+                        borderColor: '#1f2937', 
+                        borderWidth: 4 
+                    }]
+                },
+                options: { 
+                    responsive: true, 
+                    maintainAspectRatio: false, 
+                    cutout: '65%', 
+                    plugins: { 
+                        legend: { position: 'right', labels: { color: '#d1d5db' } },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return ` ${context.label}: ${context.parsed} files`;
+                                }
+                            }
+                        }
+                    } 
+                }
+            });
         }
-        files.forEach(file => {
-            const li = document.createElement('li');
-            li.className = 'flex items-center bg-slate-700/50 hover:bg-slate-700 p-3 rounded-lg transition-colors truncate min-w-0';
-            li.innerHTML = `
-                <i data-feather="alert-circle" class="w-4 h-4 mr-3 text-yellow-400 flex-shrink-0"></i>
-                <span class="text-sm truncate" title="${file.filepath}">${file.filepath.split('/').pop()}</span>
-            `;
-            list.appendChild(li);
-        });
     }
 
-    // Fetch data on load and then every 5 seconds
     fetchData();
     setInterval(fetchData, 5000);
 </script>
-</body> </html>
+</body>
+</html>
